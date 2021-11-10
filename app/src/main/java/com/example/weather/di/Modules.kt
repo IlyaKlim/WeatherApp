@@ -1,6 +1,6 @@
 package com.example.weather.di
 
-import com.example.weather.MainActivity
+import com.example.weather.view.MainActivity
 import com.example.weather.Presenter
 import com.example.weather.network.repository.WeatherRepository
 import com.example.weather.network.retrofit.WeatherApi

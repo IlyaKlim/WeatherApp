@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/today_weather"
+        android:enabled="true"
+        android:icon="@drawable/ic_today"
+        android:title="@string/bottom_navigation_bar_title_1"
+        />
+    <item
+        android:id="@+id/other_days_weather"
+        android:enabled="true"
+        android:icon="@drawable/ic_forecast"
+        android:title="@string/bottom_navigation_bar_title_2"/>
+
+</menu>

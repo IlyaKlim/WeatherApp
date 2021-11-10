@@ -8,5 +8,5 @@ class WeatherRepository(private val weatherApi: WeatherApi) {
         weatherApi.getWeather(lat = lat, lon = lon)
             .doOnError {
                 val text = it.message
-            }.subscribeOn(Schedulers.io()) // for background processing
+            }.subscribeOn(Schedulers.io())
 }
