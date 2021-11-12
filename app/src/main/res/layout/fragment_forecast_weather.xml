@@ -3,12 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.fragments.ForecastWeatherFragment">
+    tools:context=".view.fragments.forecast.ForecastWeatherFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/forecast_weather_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="forecast weather" />
+        android:layout_height="match_parent" />
+
 
 </FrameLayout>

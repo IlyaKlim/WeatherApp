@@ -31,4 +31,6 @@ class Presenter(private val weatherRepository: WeatherRepository) {
     fun getForecastWeather(): List<WeatherModel>? {
         return weatherModel?.list
     }
+
+    fun getCity() = weatherModel?.city
 }

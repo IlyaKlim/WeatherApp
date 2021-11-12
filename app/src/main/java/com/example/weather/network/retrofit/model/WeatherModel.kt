@@ -5,7 +5,8 @@ import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 
 data class Model(
-    val list: List<WeatherModel>
+    val list: List<WeatherModel>,
+    val city: City
 )
 
 data class WeatherModel(
@@ -96,4 +97,33 @@ data class Main(
     }
 }
 
+data class City(
+ val name:String?,
+ val country:String?
+):Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readString(),
+        parcel.readString()
+    ) {
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(name)
+        parcel.writeString(country)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<City> {
+        override fun createFromParcel(parcel: Parcel): City {
+            return City(parcel)
+        }
+
+        override fun newArray(size: Int): Array<City?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
 

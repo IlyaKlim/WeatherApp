@@ -2,7 +2,6 @@ package com.example.weather.view
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
 import android.os.Parcelable
@@ -14,8 +13,7 @@ import androidx.core.app.ActivityCompat
 import com.example.weather.Presenter
 import com.example.weather.R
 import com.example.weather.databinding.ActivityMainBinding
-import com.example.weather.network.retrofit.model.WeatherModel
-import com.example.weather.view.fragments.ForecastWeatherFragment
+import com.example.weather.view.fragments.forecast.ForecastWeatherFragment
 import com.example.weather.view.fragments.TodayWeatherFragment
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -34,6 +32,7 @@ class MainActivity : ScopeActivity() {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private val TODAY_WEATHER_ARGS_KEY: String = "today_weather_args_key"
     private val FORECAST_WEATHER_ARGS_KEY: String = "forecast_weather_args_key"
+    private val CURRENT_CITY_ARGS: String = "current_city_args"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -81,8 +80,14 @@ class MainActivity : ScopeActivity() {
         binding?.let {
             it.bottomNavigationBar.setOnItemSelectedListener { item ->
                 when (item.itemId) {
-                    R.id.today_weather -> launchTodayWeatherFragment()
-                    R.id.other_days_weather -> launchForecastWeatherFragment()
+                    R.id.today_weather -> {
+                        launchTodayWeatherFragment()
+                        it.toolBar.title = "Today"
+                    }
+                    R.id.other_days_weather -> {
+                        launchForecastWeatherFragment()
+                        it.toolBar.title = presenter.getCity()?.name
+                    }
                 }
                 return@setOnItemSelectedListener true
             }
@@ -91,21 +96,23 @@ class MainActivity : ScopeActivity() {
     }
 
     private fun launchTodayWeatherFragment() {
-        presenter.getTodayWeather()?.let {
-            val bundle: Bundle = Bundle()
-            bundle.putParcelable(TODAY_WEATHER_ARGS_KEY, it)
-            val fragment = TodayWeatherFragment()
-            fragment.arguments = bundle
-            supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment)
-                .commit()
-        }
+        val bundle: Bundle = Bundle()
+        bundle.putParcelable(TODAY_WEATHER_ARGS_KEY, presenter.getTodayWeather())
+        bundle.putParcelable(CURRENT_CITY_ARGS, presenter.getCity())
+        val fragment = TodayWeatherFragment()
+        fragment.arguments = bundle
+        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment)
+            .commit()
 
     }
 
-    private fun launchForecastWeatherFragment(){
+    private fun launchForecastWeatherFragment() {
         presenter.getForecastWeather()?.let {
             val bundle: Bundle = Bundle()
-            bundle.putParcelableArrayList(FORECAST_WEATHER_ARGS_KEY,it as ArrayList<out Parcelable>)
+            bundle.putParcelableArrayList(
+                FORECAST_WEATHER_ARGS_KEY,
+                it as ArrayList<out Parcelable>
+            )
             val fragment = ForecastWeatherFragment()
             fragment.arguments = bundle
             supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment)

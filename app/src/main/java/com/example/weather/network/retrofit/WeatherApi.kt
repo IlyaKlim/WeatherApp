@@ -7,7 +7,7 @@ import retrofit2.http.Query
 import rx.Observable
 
 interface WeatherApi {
-    @GET("forecast?appid=e936597f5e40a85ec97c88e1836ac9c7&cnt=15")
+    @GET("forecast?appid=e936597f5e40a85ec97c88e1836ac9c7&units=metric")
     fun getWeather(
         @Query("lat") lat: Double,
         @Query("lon") lon: Double
