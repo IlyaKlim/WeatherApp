@@ -17,7 +17,8 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             app:title="Today"
-            app:titleCentered="true"/>
+            app:titleCentered="true"
+            android:background="@color/white"/>
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout

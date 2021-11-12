@@ -1,6 +1,7 @@
 package com.example.weather.view
 
 import android.Manifest
+import android.content.*
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
@@ -22,6 +23,9 @@ import org.koin.androidx.scope.ScopeActivity
 import org.koin.androidx.scope.activityScope
 import org.koin.core.scope.Scope
 import java.util.ArrayList
+import android.provider.Settings
+import androidx.appcompat.app.AlertDialog
+
 
 class MainActivity : ScopeActivity() {
     private var binding: ActivityMainBinding? = null
@@ -35,9 +39,11 @@ class MainActivity : ScopeActivity() {
     private val CURRENT_CITY_ARGS: String = "current_city_args"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        registerReceiver(mGpsSwitchStateReceiver, IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
         binding = ActivityMainBinding.inflate(layoutInflater)
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+
         requestPermissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissionData ->
@@ -55,9 +61,13 @@ class MainActivity : ScopeActivity() {
                 ) {
                     Toast.makeText(this, "No permission granted ", Toast.LENGTH_LONG).show()
                 } else {
-                    fusedLocationProviderClient.lastLocation.addOnSuccessListener {
-                        presenter.setLocation(lat = it.latitude, lon = it.longitude)
-                        presenter.getWeather()
+                    if ( locationManager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
+                        fusedLocationProviderClient.lastLocation.addOnSuccessListener {
+                            presenter.setLocation(lat = it.latitude, lon = it.longitude)
+                            presenter.getWeather()
+                        }
+                    }else{
+                        buildAlertMessageNoGps()
                     }
                 }
             } else {
@@ -95,8 +105,9 @@ class MainActivity : ScopeActivity() {
         setContentView(binding?.root)
     }
 
+
     private fun launchTodayWeatherFragment() {
-        val bundle: Bundle = Bundle()
+        val bundle = Bundle()
         bundle.putParcelable(TODAY_WEATHER_ARGS_KEY, presenter.getTodayWeather())
         bundle.putParcelable(CURRENT_CITY_ARGS, presenter.getCity())
         val fragment = TodayWeatherFragment()
@@ -108,7 +119,7 @@ class MainActivity : ScopeActivity() {
 
     private fun launchForecastWeatherFragment() {
         presenter.getForecastWeather()?.let {
-            val bundle: Bundle = Bundle()
+            val bundle = Bundle()
             bundle.putParcelableArrayList(
                 FORECAST_WEATHER_ARGS_KEY,
                 it as ArrayList<out Parcelable>
@@ -119,5 +130,38 @@ class MainActivity : ScopeActivity() {
                 .commit()
         }
     }
+
+    private fun buildAlertMessageNoGps() {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
+            .setCancelable(false)
+            .setPositiveButton("Yes") { dialog, id -> startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)) }
+            .setNegativeButton("No",
+                DialogInterface.OnClickListener { dialog, id -> dialog.cancel() })
+        val alert: AlertDialog = builder.create()
+        alert.show()
+    }
+
+    private val mGpsSwitchStateReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent) {
+            if (intent.action!!.matches("android.location.PROVIDERS_CHANGED".toRegex())) {
+                if (ActivityCompat.checkSelfPermission(
+                        this@MainActivity,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                        this@MainActivity,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    return
+                }
+                fusedLocationProviderClient.lastLocation.addOnSuccessListener {
+                    presenter.setLocation(lat = it.latitude, lon = it.longitude)
+                    presenter.getWeather()
+                }
+            }
+        }
+    }
+
 
 }
