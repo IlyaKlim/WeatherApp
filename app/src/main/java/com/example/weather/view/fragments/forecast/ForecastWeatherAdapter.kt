@@ -3,6 +3,7 @@ package com.example.weather.view.fragments.forecast
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.weather.R
 import com.example.weather.databinding.WeatherViewBinding
 import com.example.weather.databinding.WeatherViewHolderBinding
 import com.example.weather.network.retrofit.model.WeatherModel
@@ -37,6 +38,7 @@ class ForecastWeatherAdapter(private val weather: List<WeatherModel>) :
             binding.temperatureView.text = "$temp℃"
             binding.weatherDescription.text = model.weather?.get(0)?.main
             binding.timeView.text = time
+            binding.weatherIcon.setImageResource(getImageId(model.weather?.get(0)?.icon ?: ""))
         }
 
     }
@@ -59,6 +61,7 @@ class ForecastWeatherAdapter(private val weather: List<WeatherModel>) :
             binding.temperatureView.text = "$temp℃"
             binding.weatherDescription.text = model.weather?.get(0)?.main
             binding.timeView.text = time
+            binding.weatherIcon.setImageResource(getImageId(model.weather?.get(0)?.icon ?: ""))
         }
     }
 
@@ -110,11 +113,72 @@ class ForecastWeatherAdapter(private val weather: List<WeatherModel>) :
         return (currentDay == previousDay)
     }
 
-    private fun getDayOfWeek(weather:WeatherModel):Int{
+    private fun getDayOfWeek(weather: WeatherModel): Int {
         val format = SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss", Locale("Rus"))
         var date: Date? = format.parse(weather.date ?: "")
         val calendar: Calendar = Calendar.getInstance()
         calendar.time = date
         return calendar.get(Calendar.DAY_OF_WEEK)
     }
+
+    private fun getImageId(imageId: String): Int {
+        return when (imageId) {
+            "01d" -> {
+                R.drawable.ic_sunny
+            }
+            "02d" -> {
+                R.drawable.wi_day_sunny_overcast
+            }
+            "03d" -> {
+                R.drawable.wi_day_sunny_overcast
+            }
+            "04d" -> {
+                R.drawable.wi_day_cloudy
+            }
+            "9d" -> {
+                R.drawable.wi_day_rain_mix
+            }
+            "10d" -> {
+                R.drawable.wi_day_rain
+            }
+            "11d" -> {
+                R.drawable.wi_day_thunderstorm
+            }
+            "13d" -> {
+                R.drawable.wi_day_snow
+            }
+            "50d" -> {
+                R.drawable.wi_day_fog
+            }
+            "01n" -> {
+                R.drawable.wi_night_clear
+            }
+            "02n" -> {
+                R.drawable.wi_night_alt_partly_cloudy
+            }
+            "03n" -> {
+                R.drawable.wi_night_alt_partly_cloudy
+            }
+            "04n" -> {
+                R.drawable.wi_night_alt_cloudy
+            }
+            "10n" -> {
+                R.drawable.wi_night_alt_rain
+            }
+            "9n" -> {
+                R.drawable.wi_night_alt_rain_mix
+            }
+            "11n" -> {
+                R.drawable.wi_night_alt_thunderstorm
+            }
+            "13n" -> {
+                R.drawable.wi_night_alt_snow
+            }
+            "50n" -> {
+                R.drawable.wi_night_fog
+            }
+            else -> R.drawable.ic_cloudy
+        }
+    }
+
 }

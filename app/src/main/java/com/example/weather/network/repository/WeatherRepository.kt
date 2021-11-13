@@ -1,7 +1,7 @@
 package com.example.weather.network.repository
 
 import com.example.weather.network.retrofit.WeatherApi
-import rx.schedulers.Schedulers
+import io.reactivex.schedulers.Schedulers
 
 class WeatherRepository(private val weatherApi: WeatherApi) {
     fun getWeather(lat: Double, lon: Double) =
