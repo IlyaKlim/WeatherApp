@@ -1,6 +1,6 @@
 package com.example.weather.presenter
 
-import androidx.lifecycle.MutableLiveData
+import com.example.weather.R
 import com.example.weather.network.repository.WeatherRepository
 import com.example.weather.network.retrofit.model.Model
 import com.example.weather.network.retrofit.model.WeatherModel
@@ -12,7 +12,6 @@ class Presenter(private val weatherRepository: WeatherRepository) {
     private var viewController: ViewController? = null
     private var latLon: List<Double> = listOf()
     private var weatherModel: Model? = null
-    private val onWeatherReceivedLiveData: MutableLiveData<Boolean> = MutableLiveData()
     private val subscriber: Observer<Model> = object : Observer<Model> {
 
 
@@ -22,11 +21,11 @@ class Presenter(private val weatherRepository: WeatherRepository) {
         }
 
         override fun onError(e: Throwable) {
-            viewController?.loadOnError(e.message ?: "")
+            viewController?.launchErrorView(e.message ?: "", R.drawable.ic_error)
         }
 
         override fun onNext(t: Model) {
-            viewController?.enableProgress(false)
+            viewController?.enableProgress(true)
             weatherModel = t
         }
 
@@ -45,8 +44,6 @@ class Presenter(private val weatherRepository: WeatherRepository) {
                 .observeOn(AndroidSchedulers.mainThread()).subscribe(subscriber)
         }
     }
-
-    fun getWeatherReceivedLifeData() = onWeatherReceivedLiveData
 
     fun setLocation(lat: Double, lon: Double) {
         latLon = listOf(lat, lon)

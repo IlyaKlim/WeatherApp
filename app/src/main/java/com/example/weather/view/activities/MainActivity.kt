@@ -31,6 +31,10 @@ import com.example.weather.network.retrofit.model.City
 import com.example.weather.network.retrofit.model.WeatherModel
 import com.example.weather.presenter.ViewController
 import java.lang.Exception
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.NetworkInfo
+import android.os.Build
 
 
 class MainActivity : ScopeActivity(), ViewController {
@@ -57,41 +61,12 @@ class MainActivity : ScopeActivity(), ViewController {
             if (permissionData[Manifest.permission.ACCESS_FINE_LOCATION] == true
                 && permissionData[Manifest.permission.ACCESS_COARSE_LOCATION] == true
             ) {
-                if (ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    Toast.makeText(this, "No permission granted ", Toast.LENGTH_LONG).show()
-                } else {
-                    if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                        fusedLocationProviderClient.lastLocation.addOnSuccessListener {
-                            presenter.setLocation(lat = it.latitude, lon = it.longitude)
-                            presenter.getWeather()
-                        }
-                    } else {
-                        buildAlertMessageNoGps()
-                    }
-                }
+                getData()
             } else {
-                Toast.makeText(this, "Fail", Toast.LENGTH_LONG).show()
+                launchNoLocationPermissionError()
             }
         }
-        requestPermissionLauncher.launch(
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            )
-        )
-
-        presenter.getWeatherReceivedLifeData().observe(this) {
-            if (it) {
-                launchTodayWeatherFragment()
-            }
-        }
+        requestPermission()
 
         binding?.let {
             it.bottomNavigationBar.setOnItemSelectedListener { item ->
@@ -111,25 +86,6 @@ class MainActivity : ScopeActivity(), ViewController {
         setContentView(binding?.root)
     }
 
-    override fun onRestart() {
-        if (ActivityCompat.checkSelfPermission(
-                this@MainActivity,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this@MainActivity,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return
-        }
-        fusedLocationProviderClient.lastLocation.addOnSuccessListener {
-            presenter.setLocation(lat = it.latitude, lon = it.longitude)
-            presenter.getWeather()
-        }
-
-        super.onRestart()
-    }
-
 
     override fun launchTodayWeatherFragment() {
         val bundle = Bundle()
@@ -140,6 +96,19 @@ class MainActivity : ScopeActivity(), ViewController {
         supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment)
             .commit()
 
+    }
+
+    override fun launchErrorView(errorText: String, iconId: Int) {
+        binding?.let {
+            it.progressBar.visibility = View.INVISIBLE
+            it.errorView.visibility = View.VISIBLE
+            it.errorIcon.setImageResource(iconId)
+            it.errorTextView.text = errorText
+            it.tryAgainButton.setOnClickListener { _ ->
+                it.errorView.visibility = View.INVISIBLE
+                getData()
+            }
+        }
     }
 
     private fun launchForecastWeatherFragment() {
@@ -156,21 +125,6 @@ class MainActivity : ScopeActivity(), ViewController {
         }
     }
 
-    private fun buildAlertMessageNoGps() {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
-            .setCancelable(false)
-            .setPositiveButton("Yes") { dialog, id -> startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)) }
-            .setNegativeButton("No",
-                DialogInterface.OnClickListener { dialog, id -> dialog.cancel() })
-        val alert: AlertDialog = builder.create()
-        alert.show()
-    }
-
-    override fun loadOnError(e: String) {
-        TODO("Not yet implemented")
-    }
-
     override fun enableProgress(isEnabled: Boolean) {
         when (isEnabled) {
             true -> {
@@ -184,5 +138,74 @@ class MainActivity : ScopeActivity(), ViewController {
         }
     }
 
+    fun launchNoLocationPermissionError() {
+        binding?.let {
+            it.progressBar.visibility = View.INVISIBLE
+            it.errorView.visibility = View.VISIBLE
+            it.errorIcon.setImageResource(R.drawable.ic_location_off)
+            it.errorTextView.text = getString(R.string.no_location_permission)
+            it.tryAgainButton.text = getString(R.string.grant_permission)
+            it.tryAgainButton.setOnClickListener { _ ->
+                it.errorView.visibility = View.INVISIBLE
+                requestPermission()
+            }
+        }
 
+    }
+
+    fun isOnline(): Boolean {
+        val connectivityManager =
+            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val network = connectivityManager.activeNetwork ?: return false
+            val actNw = connectivityManager.getNetworkCapabilities(network) ?: return false
+            return when {
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+                //for other device how are able to connect with Ethernet
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+                //for check internet over Bluetooth
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH) -> true
+                else -> false
+            }
+        } else {
+            val nwInfo = connectivityManager.activeNetworkInfo ?: return false
+            return nwInfo.isConnected
+        }
+    }
+
+    fun getData() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            launchNoLocationPermissionError()
+        } else {
+            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                if (isOnline()) {
+                    fusedLocationProviderClient.lastLocation.addOnSuccessListener {
+                        presenter.setLocation(lat = it.latitude, lon = it.longitude)
+                        presenter.getWeather()
+                    }
+                } else {
+                    launchErrorView("No internet connection", R.drawable.ic_internet)
+                }
+            } else {
+                launchErrorView("Location is not enabled", R.drawable.ic_location_off)
+            }
+        }
+    }
+
+    private fun requestPermission() {
+        requestPermissionLauncher.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        )
+    }
 }

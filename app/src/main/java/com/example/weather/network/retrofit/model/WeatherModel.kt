@@ -13,14 +13,17 @@ data class WeatherModel(
     val main: Main?,
     val weather: List<Weather>?,
     @SerializedName("dt_txt")
-    val date:String?
-):Parcelable {
+    val date: String?,
+    val wind: Wind?,
+    val rain: Rain?
+) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readParcelable(Main::class.java.classLoader),
         parcel.createTypedArrayList(Weather),
-        parcel.readString()
-    ) {
-    }
+        parcel.readString(),
+        parcel.readParcelable(Wind::class.java.classLoader),
+        parcel.readParcelable(Rain::class.java.classLoader)
+    )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeParcelable(main, flags)
@@ -44,12 +47,12 @@ data class WeatherModel(
 }
 
 data class Weather(
-    val main:String?,
-    val icon:String?
-):Parcelable {
+    val main: String?,
+    val icon: String?
+) : Parcelable {
     constructor(parcel: Parcel) : this(
-        parcel.readString()?:"",
-        parcel.readString()?:""
+        parcel.readString() ?: "",
+        parcel.readString() ?: ""
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -73,10 +76,15 @@ data class Weather(
 }
 
 data class Main(
-    val temp:String?
-): Parcelable {
-    constructor(parcel: Parcel) : this(parcel.readString()?:"") {
-    }
+    val temp: String?,
+    val humidity: String?,
+    val pressure:String?
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString()
+    )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(temp)
@@ -98,9 +106,9 @@ data class Main(
 }
 
 data class City(
- val name:String?,
- val country:String?
-):Parcelable {
+    val name: String?,
+    val country: String?
+) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString(),
         parcel.readString()
@@ -127,3 +135,61 @@ data class City(
     }
 }
 
+data class Wind(
+    val speed: String?,
+    val deg: Double?,
+    val gust: String?
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readString(),
+        parcel.readDouble(),
+        parcel.readString()
+    ) {
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(speed)
+        parcel.writeDouble(deg?:0.0)
+        parcel.writeString(gust)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<Wind> {
+        override fun createFromParcel(parcel: Parcel): Wind {
+            return Wind(parcel)
+        }
+
+        override fun newArray(size: Int): Array<Wind?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
+
+data class Rain(
+    @SerializedName("3h")
+    val percent: String?
+) : Parcelable {
+    constructor(parcel: Parcel) : this(parcel.readString()) {
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(percent)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<Rain> {
+        override fun createFromParcel(parcel: Parcel): Rain {
+            return Rain(parcel)
+        }
+
+        override fun newArray(size: Int): Array<Rain?> {
+            return arrayOfNulls(size)
+        }
+    }
+}

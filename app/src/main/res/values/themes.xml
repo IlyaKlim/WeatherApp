@@ -13,4 +13,32 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <style name="WeatherParameterIconStyle">
+        <item name="android:scaleType">centerCrop</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:layout_centerHorizontal">true</item>
+        <item name="android:layout_height">30dp</item>
+        <item name="android:layout_width">30dp</item>
+        <item name="android:tint">@color/yellow</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+    <style name="WeatherTextViewStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+    <style name="WeatherParameterLinearLayoutStyle">
+        <item name="android:gravity">center</item>
+        <item name="android:layout_centerHorizontal">true</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+    <style name="Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">@color/light_gray</item>
+        <item name="android:layout_marginEnd">128dp</item>
+        <item name="android:layout_marginStart">128dp</item>
+    </style>
 </resources>

@@ -5,4 +5,8 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="celsius">℃</string>
+    <string name="share_text_button">Share</string>
+    <string name="try_again_button">Try again</string>
+    <string name="no_location_permission">No location permission</string>
+    <string name="grant_permission">Grant permission</string>
 </resources>

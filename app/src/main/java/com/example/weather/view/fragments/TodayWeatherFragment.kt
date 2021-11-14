@@ -1,6 +1,8 @@
 package com.example.weather.view.fragments
 
 import android.annotation.SuppressLint
+import android.icu.text.RelativeDateTimeFormatter
+import android.location.Location
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -10,7 +12,9 @@ import com.example.weather.R
 import com.example.weather.databinding.FragmentTodayWeatherBinding
 import com.example.weather.network.retrofit.model.City
 import com.example.weather.network.retrofit.model.WeatherModel
+import kotlin.math.floor
 import kotlin.math.roundToInt
+import android.content.Intent
 
 class TodayWeatherFragment : Fragment() {
     private var binding: FragmentTodayWeatherBinding? = null
@@ -44,6 +48,14 @@ class TodayWeatherFragment : Fragment() {
                         0
                     )?.main
                 mBinding.location.text = city?.name + "," + city?.country
+                mBinding.humidityView.text = data?.main?.humidity + "%"
+                mBinding.pressureView.text = data?.main?.pressure + "hPa"
+                mBinding.windView.text = data?.wind?.speed + "km/h"
+                mBinding.directionView.text = getDirection(data?.wind?.deg?:0.0)
+                mBinding.rainView.text = data?.rain?.percent?:"0" + "mm"
+                mBinding.shareButton.setOnClickListener {
+                    share("Weather : ${data?.weather?.get(0)?.main} \n Temperature : $temp")
+                }
             }
         }
         super.onViewCreated(view, savedInstanceState)
@@ -107,5 +119,20 @@ class TodayWeatherFragment : Fragment() {
             }
             else -> R.drawable.ic_cloudy
         }
+    }
+
+    private fun getDirection(degrees: Double):String{
+        val array = listOf("N","NNE","NE","ENE","E","ESE", "SE", "SSE","S","SSW","SW","WSW","W","WNW","NW","NNW")
+        val value = floor((degrees / 22.5) + 0.5)
+        return array[(value%16).toInt()]
+
+    }
+
+    private fun share(data:String){
+        val sendIntent = Intent()
+        sendIntent.action = Intent.ACTION_SEND
+        sendIntent.putExtra(Intent.EXTRA_TEXT, data)
+        sendIntent.type = "text/plain"
+        startActivity(Intent.createChooser(sendIntent, "Share"))
     }
 }
