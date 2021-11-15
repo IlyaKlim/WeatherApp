@@ -25,11 +25,11 @@ class Presenter(private val weatherRepository: WeatherRepository) {
         }
 
         override fun onNext(t: Model) {
-            viewController?.enableProgress(true)
             weatherModel = t
         }
 
         override fun onSubscribe(d: Disposable) {
+            viewController?.enableProgress(true)
         }
 
     }

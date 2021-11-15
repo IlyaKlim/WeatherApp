@@ -127,6 +127,7 @@ class MainActivity : ScopeActivity(), ViewController {
             true -> {
                 binding?.fragmentContainer?.visibility = View.INVISIBLE
                 binding?.progressBar?.visibility = View.VISIBLE
+                binding?.bottomNavigationBar?.visibility = View.VISIBLE
             }
             false -> {
                 binding?.fragmentContainer?.visibility = View.VISIBLE
@@ -135,7 +136,7 @@ class MainActivity : ScopeActivity(), ViewController {
         }
     }
 
-    fun launchNoLocationPermissionError() {
+    private fun launchNoLocationPermissionError() {
         binding?.let {
             it.progressBar.visibility = View.INVISIBLE
             it.errorView.visibility = View.VISIBLE
@@ -150,7 +151,7 @@ class MainActivity : ScopeActivity(), ViewController {
 
     }
 
-    fun isOnline(): Boolean {
+    private fun isOnline(): Boolean {
         val connectivityManager =
             getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -171,7 +172,7 @@ class MainActivity : ScopeActivity(), ViewController {
         }
     }
 
-    fun getData() {
+    private fun getData() {
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
