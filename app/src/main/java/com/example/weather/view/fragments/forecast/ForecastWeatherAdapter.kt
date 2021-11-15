@@ -35,7 +35,7 @@ class ForecastWeatherAdapter(private val weather: List<WeatherModel>) :
             var time = model.date?.substringAfter(" ")
             time = time?.substringBeforeLast(":")
             val temp = model.main?.temp?.substringBefore(".")
-            binding.temperatureView.text = "$temp"
+            binding.temperatureView.text = "$temp℃"
             binding.weatherDescription.text = model.weather?.get(0)?.main
             binding.timeView.text = time
             binding.weatherIcon.setImageResource(getImageId(model.weather?.get(0)?.icon ?: ""))
