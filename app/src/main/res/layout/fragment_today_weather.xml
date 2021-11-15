@@ -123,7 +123,7 @@
 
         <ImageView
             style="@style/WeatherParameterIconStyle"
-            android:src="@drawable/wi_celsius" />
+            android:src="@drawable/temperature_celsius" />
 
         <TextView
             android:id="@+id/pressure_view"

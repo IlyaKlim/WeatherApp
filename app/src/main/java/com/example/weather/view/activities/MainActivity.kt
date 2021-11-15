@@ -3,38 +3,35 @@ package com.example.weather.view.activities
 import android.Manifest
 import android.content.*
 import android.content.pm.PackageManager
+import android.location.Location
 import android.location.LocationManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.Log
-import android.widget.Toast
+import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
-import com.example.weather.presenter.Presenter
 import com.example.weather.R
 import com.example.weather.databinding.ActivityMainBinding
-import com.example.weather.view.fragments.forecast.ForecastWeatherFragment
+import com.example.weather.presenter.Presenter
+import com.example.weather.presenter.ViewController
 import com.example.weather.view.fragments.TodayWeatherFragment
+import com.example.weather.view.fragments.forecast.ForecastWeatherFragment
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.CancellationToken
+import com.google.android.gms.tasks.OnTokenCanceledListener
 import org.koin.android.ext.android.inject
 import org.koin.androidx.scope.ScopeActivity
 import org.koin.androidx.scope.activityScope
 import org.koin.core.scope.Scope
-import java.util.ArrayList
-import android.provider.Settings
-import android.view.View
-import androidx.appcompat.app.AlertDialog
-import androidx.core.view.isVisible
-import com.example.weather.network.retrofit.model.City
-import com.example.weather.network.retrofit.model.WeatherModel
-import com.example.weather.presenter.ViewController
-import java.lang.Exception
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.net.NetworkInfo
-import android.os.Build
+import java.util.*
 
 
 class MainActivity : ScopeActivity(), ViewController {
@@ -187,9 +184,41 @@ class MainActivity : ScopeActivity(), ViewController {
         } else {
             if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 if (isOnline()) {
-                    fusedLocationProviderClient.lastLocation.addOnSuccessListener {
-                        presenter.setLocation(lat = it.latitude, lon = it.longitude)
-                        presenter.getWeather()
+                    if (GoogleApiAvailability.getInstance()
+                            .isGooglePlayServicesAvailable(this) == 0 || GoogleApiAvailability.getInstance()
+                            .isGooglePlayServicesAvailable(this) == 2
+                    ) {
+                        fusedLocationProviderClient.getCurrentLocation(
+                            LocationRequest.PRIORITY_HIGH_ACCURACY,
+                            object : CancellationToken() {
+                                override fun isCancellationRequested(): Boolean {
+                                    return true
+                                }
+
+                                override fun onCanceledRequested(p0: OnTokenCanceledListener): CancellationToken {
+                                    return this
+                                }
+
+                            }
+                        ).addOnSuccessListener { location: Location? ->
+                            if (location?.latitude != null && location?.longitude != null) {
+                                presenter.setLocation(
+                                    lat = location.latitude,
+                                    lon = location.longitude
+                                )
+                                presenter.getWeather()
+                            } else {
+                                launchErrorView(
+                                    "Location was not received",
+                                    R.drawable.ic_location_off
+                                )
+                            }
+                        }
+                    } else {
+                        launchErrorView(
+                            "Google services are not supported",
+                            R.drawable.ic_location_off
+                        )
                     }
                 } else {
                     launchErrorView("No internet connection", R.drawable.ic_internet)
