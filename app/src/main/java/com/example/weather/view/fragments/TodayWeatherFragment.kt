@@ -1,20 +1,17 @@
 package com.example.weather.view.fragments
 
 import android.annotation.SuppressLint
-import android.icu.text.RelativeDateTimeFormatter
-import android.location.Location
+import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.example.weather.R
 import com.example.weather.databinding.FragmentTodayWeatherBinding
 import com.example.weather.network.retrofit.model.City
 import com.example.weather.network.retrofit.model.WeatherModel
 import kotlin.math.floor
-import kotlin.math.roundToInt
-import android.content.Intent
 
 class TodayWeatherFragment : Fragment() {
     private var binding: FragmentTodayWeatherBinding? = null
@@ -42,7 +39,7 @@ class TodayWeatherFragment : Fragment() {
             binding?.let { mBinding ->
                 val temp = data?.main?.temp?.substringBefore(".")
                 val weatherIconId = data?.weather?.get(0)?.icon ?: ""
-                mBinding.weatherIcon.setImageResource(getImageId(data?.weather?.get(0)?.icon ?: ""))
+                mBinding.weatherIcon.setImageResource(getImageId(weatherIconId))
                 mBinding.weatherTextView.text =
                     temp + resources.getString(R.string.celsius) + " | " + data?.weather?.get(
                         0

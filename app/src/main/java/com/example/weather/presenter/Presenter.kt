@@ -5,7 +5,6 @@ import com.example.weather.network.repository.WeatherRepository
 import com.example.weather.network.retrofit.model.Model
 import com.example.weather.network.retrofit.model.WeatherModel
 import io.reactivex.Observer
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 
 class Presenter(private val weatherRepository: WeatherRepository) {
@@ -40,8 +39,7 @@ class Presenter(private val weatherRepository: WeatherRepository) {
 
     fun getWeather() {
         if (latLon.isNotEmpty()) {
-            weatherRepository.getWeather(lat = latLon[0], lon = latLon[1])
-                .observeOn(AndroidSchedulers.mainThread()).subscribe(subscriber)
+            weatherRepository.getWeather(lat = latLon[0], lon = latLon[1]).subscribe(subscriber)
         }
     }
 

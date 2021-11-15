@@ -202,7 +202,7 @@ class MainActivity : ScopeActivity(), ViewController {
 
                             }
                         ).addOnSuccessListener { location: Location? ->
-                            if (location?.latitude != null && location?.longitude != null) {
+                            if (location?.latitude != null) {
                                 presenter.setLocation(
                                     lat = location.latitude,
                                     lon = location.longitude

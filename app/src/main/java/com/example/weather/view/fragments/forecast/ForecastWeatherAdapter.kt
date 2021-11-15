@@ -1,5 +1,6 @@
 package com.example.weather.view.fragments.forecast
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -12,7 +13,6 @@ import java.util.*
 
 class ForecastWeatherAdapter(private val weather: List<WeatherModel>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private var currentDayOfTheWeek: Int = -1
     private val NEW_WEEK_VIEW_HOLDER = 0
     private val CURRENT_WEEK_VIEW_HOLDER = 1
 
@@ -35,7 +35,7 @@ class ForecastWeatherAdapter(private val weather: List<WeatherModel>) :
             var time = model.date?.substringAfter(" ")
             time = time?.substringBeforeLast(":")
             val temp = model.main?.temp?.substringBefore(".")
-            binding.temperatureView.text = "$temp℃"
+            binding.temperatureView.text = "$temp"
             binding.weatherDescription.text = model.weather?.get(0)?.main
             binding.timeView.text = time
             binding.weatherIcon.setImageResource(getImageId(model.weather?.get(0)?.icon ?: ""))
@@ -45,6 +45,7 @@ class ForecastWeatherAdapter(private val weather: List<WeatherModel>) :
 
     inner class NewWeekViewHolder(private val binding: WeatherViewHolderBinding) :
         RecyclerView.ViewHolder(binding.root) {
+        @SuppressLint("SetTextI18n")
         fun setData(model: WeatherModel) {
             when (getDayOfWeek(weather = model)) {
                 Calendar.MONDAY -> binding.dayOfTheWeek.text = "Monday"
@@ -105,19 +106,19 @@ class ForecastWeatherAdapter(private val weather: List<WeatherModel>) :
         val format = SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss", Locale("Rus"))
         var date: Date? = format.parse(weather[position].date ?: "")
         val calendar: Calendar = Calendar.getInstance()
-        calendar.time = date
+        calendar.time = date?: Date()
         val currentDay: Int = calendar.get(Calendar.DAY_OF_WEEK)
         date = format.parse(weather[position - 1].date ?: "")
-        calendar.time = date
+        calendar.time = date?: Date()
         val previousDay: Int = calendar.get(Calendar.DAY_OF_WEEK)
         return (currentDay == previousDay)
     }
 
     private fun getDayOfWeek(weather: WeatherModel): Int {
         val format = SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss", Locale("Rus"))
-        var date: Date? = format.parse(weather.date ?: "")
+        val date: Date? = format.parse(weather.date ?: "")
         val calendar: Calendar = Calendar.getInstance()
-        calendar.time = date
+        calendar.time = date?:Date()
         return calendar.get(Calendar.DAY_OF_WEEK)
     }
 
